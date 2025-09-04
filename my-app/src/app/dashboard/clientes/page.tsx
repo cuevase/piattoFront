@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ChefHat, Users, TrendingUp, Eye, ArrowLeft, Package, CheckCircle, Circle, Link, Crown, Loader2, Plus, Trash2, X, Sparkles } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { supabaseBrowser } from "@/app/lib/supabase-browser"
-import { getCompanyInfo, getCompanyClients, getClientMenus, getMenuComponents, getComponentTypes } from "@/lib/api"
+import { getCompanyInfo, getCompanyClients, getClientMenus, getMenuComponents, getComponentTypes, getClientSedes } from "@/lib/api"
 
 export default function ClientesPage()  {
   const [clients, setClients] = useState<any[]>([])
@@ -18,6 +18,8 @@ export default function ClientesPage()  {
   const [selectedMenu, setSelectedMenu] = useState<any>(null)
   const [clientMenus, setClientMenus] = useState<any[]>([])
   const [menuComponents, setMenuComponents] = useState<any[]>([])
+  const [clientSedes, setClientSedes] = useState<Record<number, any[]>>({})
+  const [sedesLoading, setSedesLoading] = useState<Record<number, boolean>>({})
   const [componentTypes, setComponentTypes] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [menusLoading, setMenusLoading] = useState(false)
@@ -123,6 +125,19 @@ export default function ClientesPage()  {
       setClientMenus([])
     } finally {
       setMenusLoading(false)
+    }
+  }
+
+  const fetchClientSedes = async (clientId: number) => {
+    try {
+      setSedesLoading(prev => ({ ...prev, [clientId]: true }))
+      const sedes = await getClientSedes(clientId)
+      setClientSedes(prev => ({ ...prev, [clientId]: sedes || [] }))
+    } catch (error) {
+      console.error('Error fetching sedes:', error)
+      setClientSedes(prev => ({ ...prev, [clientId]: [] }))
+    } finally {
+      setSedesLoading(prev => ({ ...prev, [clientId]: false }))
     }
   }
 
@@ -798,6 +813,38 @@ export default function ClientesPage()  {
                   </Card>
                 </div>
 
+                {/* Sedes section */}
+                <Card className="border-purple-200">
+                  <CardHeader>
+                    <CardTitle className="text-purple-800">Sedes</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    {sedesLoading[selectedClient.id] ? (
+                      <div className="flex items-center text-purple-600">
+                        <Loader2 className="h-5 w-5 mr-2 animate-spin" /> Cargando sedes...
+                      </div>
+                    ) : clientSedes[selectedClient.id] && clientSedes[selectedClient.id].length > 0 ? (
+                      <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
+                        {clientSedes[selectedClient.id].map((sede) => (
+                          <Card key={sede.id} className="border-purple-100">
+                            <CardContent className="p-4">
+                              <h4 className="font-semibold text-purple-800">{sede.nombre}</h4>
+                              {sede.direccion && (
+                                <p className="text-sm text-gray-600 mt-1">{sede.direccion}</p>
+                              )}
+                              <div className="text-xs text-gray-500 mt-2">
+                                {sede.correo || 'Sin correo'}
+                              </div>
+                            </CardContent>
+                          </Card>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-gray-600">Sin sedes</div>
+                    )}
+                  </CardContent>
+                </Card>
+
                 {selectedClient.preferencias_carnicas && Object.keys(selectedClient.preferencias_carnicas).length > 0 && (
                   <Card className="border-purple-200">
                     <CardHeader>
@@ -921,6 +968,7 @@ export default function ClientesPage()  {
                   setSelectedClient(client);
                   setSelectedMenu(null); // Clear any previously selected menu
                   fetchClientMenus(client.id);
+                  fetchClientSedes(client.id);
                 }}
               >
                 <CardContent className="p-6">
@@ -943,9 +991,6 @@ export default function ClientesPage()  {
                         <p className="text-purple-600">Presupuesto</p>
                         <p className="font-semibold text-purple-800">${client.presupuesto_por_menu}</p>
                       </div>
-                      <Button variant="ghost" size="sm" className="text-purple-600 hover:bg-purple-50">
-                        Ver Menús →
-                      </Button>
                     </div>
                   </div>
                 </CardContent>

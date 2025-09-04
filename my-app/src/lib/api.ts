@@ -416,6 +416,16 @@ export async function getClientMenus(clientId: number) {
   return data
 }
 
+// Get sedes for a specific client (backend endpoint)
+export async function getClientSedes(clientId: number) {
+  try {
+    return await apiGet(`/clientes/${clientId}/sedes`)
+  } catch (error) {
+    console.error(`Error fetching sedes for client ${clientId}:`, error)
+    throw error
+  }
+}
+
 // Get components for a specific menu
 export async function getMenuComponents(menuId: string) {
   const supabase = supabaseBrowser()
