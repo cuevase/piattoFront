@@ -6,7 +6,7 @@ import { useRouter, usePathname } from "next/navigation"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { ChefHat, BarChart3, Settings, LogOut, Users, Building, Eye, Loader2, Package, Cog } from "lucide-react"
+import { ChefHat, BarChart3, Settings, LogOut, Users, Building, Eye, Loader2, Package, Cog, Warehouse } from "lucide-react"
 import { supabaseBrowser } from "@/app/lib/supabase-browser"
 import { apiGet, getCompanyInfo, getCompanyClients } from "@/lib/api"
 
@@ -164,6 +164,7 @@ export default function DashboardLayout({
     { id: "/dashboard/menus", label: "Generar Menús", icon: ChefHat },
     { id: "/dashboard/clientes", label: "Clientes", icon: Users },
     { id: "/dashboard/shipments", label: "Envíos", icon: Package },
+    { id: "/dashboard/inventario", label: "Inventario", icon: Warehouse },
     { id: "/dashboard/data", label: "Ver Datos", icon: Eye },
     // Only show company config for admin users
     ...(isAdmin ? [{ id: "/dashboard/config/company", label: "Configuración de Empresa", icon: Building }] : []),
@@ -247,6 +248,18 @@ export default function DashboardLayout({
               >
                 <Package className="h-4 w-4" />
                 Consolidaciones
+              </Link>
+              
+              <Link
+                href="/dashboard/inventario"
+                className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pathname.startsWith('/dashboard/inventario')
+                    ? 'bg-purple-100 text-purple-700'
+                    : 'text-gray-700 hover:bg-gray-100'
+                }`}
+              >
+                <Warehouse className="h-4 w-4" />
+                Inventario
               </Link>
 
               

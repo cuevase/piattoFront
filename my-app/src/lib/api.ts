@@ -426,6 +426,70 @@ export async function getClientSedes(clientId: number) {
   }
 }
 
+// Inventory/Stock API functions
+export interface StockData {
+  id: number
+  ingrediente_id: string
+  sede_id: number
+  inv_inicial: number
+  ingreso: number
+  produccion_pr: number
+  produccion_re: number
+  venta_real_exp: number
+  sobrante_prod: number
+  venta_carta: number
+  inv_final: number
+  fecha: string
+  created_at: string
+}
+
+export interface StockResponse {
+  success: boolean
+  data: StockData[]
+  count: number
+  sede_id?: number
+}
+
+// Get latest stock for all ingredients (global)
+export async function getGlobalStock(): Promise<StockResponse> {
+  try {
+    return await apiGet('/ingredientes/stock/latest')
+  } catch (error) {
+    console.error('Error fetching global stock:', error)
+    throw error
+  }
+}
+
+// Get latest stock for all ingredients in a specific sede
+export async function getSedeStock(sedeId: number): Promise<StockResponse> {
+  try {
+    return await apiGet(`/sedes/${sedeId}/ingredientes/stock/latest`)
+  } catch (error) {
+    console.error(`Error fetching stock for sede ${sedeId}:`, error)
+    throw error
+  }
+}
+
+// Get latest stock for specific ingredient (global)
+export async function getIngredientStock(ingredienteId: string): Promise<StockResponse> {
+  try {
+    return await apiGet(`/ingredientes/${ingredienteId}/stock/latest`)
+  } catch (error) {
+    console.error(`Error fetching stock for ingredient ${ingredienteId}:`, error)
+    throw error
+  }
+}
+
+// Get latest stock for specific ingredient in specific sede
+export async function getIngredientSedeStock(sedeId: number, ingredienteId: string): Promise<StockResponse> {
+  try {
+    return await apiGet(`/sedes/${sedeId}/ingredientes/${ingredienteId}/stock/latest`)
+  } catch (error) {
+    console.error(`Error fetching stock for ingredient ${ingredienteId} in sede ${sedeId}:`, error)
+    throw error
+  }
+}
+
 // Get components for a specific menu
 export async function getMenuComponents(menuId: string) {
   const supabase = supabaseBrowser()
